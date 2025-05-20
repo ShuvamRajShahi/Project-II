@@ -35,8 +35,9 @@
    ```
 
 3*Install dependencies**:
+ ```bash
      pip install -r requirements.txt
-  
+  ```
 
 **Set up the database**:
    - Create a PostgreSQL database and user.
