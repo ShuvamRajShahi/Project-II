@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tasks - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Tasks</h1>
+            <p class="text-muted">{% if user.is_manager %}Manage and track your tasks{% else %}View and track your assigned tasks{% endif %}</p>
+        </div>
+        {% if user.is_manager %}
+        <div>
+            <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Task
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Project</label>
+                    <select name="project" class="form-select">
+                        <option value="">All Projects</option>
+                        {% for project in projects %}
+                        <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>
+                            {{ project.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        {% for status in status_choices %}
+                        <option value="{{ status.0 }}" {% if status.0 == selected_status %}selected{% endif %}>
+                            {{ status.1 }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Priority</label>
+                    <select name="priority" class="form-select">
+                        <option value="">All Priorities</option>
+                        {% for priority in priority_choices %}
+                        <option value="{{ priority.0 }}" {% if priority.0 == selected_priority %}selected{% endif %}>
+                            {{ priority.1 }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tasks Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Project</th>
+                            <th>Assigned To</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            {% if user.is_manager %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'tasks:task_detail' task.id %}" class="text-decoration-none">
+                                    {{ task.title }}
+                                </a>
+                            </td>
+                            <td>{{ task.project.name }}</td>
+                            <td>
+                                {% if task.assigned_to %}
+                                    {{ task.assigned_to.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ task.due_date|date:"M d, Y" }}</td>
+                            <td><span class="badge bg-{{ task.get_status_color }}">{{ task.get_status_display }}</span></td>
+                            <td><span class="badge text-white bg-{{ task.get_priority_color }}">{{ task.get_priority_display }}</span></td>
+                            {% if user.is_manager %}
+                            <td>
+                                {% if user == task.project.manager %}
+                                <div class="btn-group">
+                                    <a href="{% url 'tasks:task_edit' task.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteTaskModal" 
+                                            data-task-id="{{ task.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{% if user.is_manager %}7{% else %}6{% endif %}" class="text-center py-4">
+                                <img src="{% static 'images/no-tasks.svg' %}" alt="No Tasks" class="mb-3" style="max-width: 200px;">
+                                <h4>No Tasks Found</h4>
+                                <p class="text-muted">There are no tasks matching your criteria.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Delete Task Modal -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this task? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="" id="deleteTaskForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Handle delete task modal
+    var deleteTaskModal = document.getElementById('deleteTaskModal')
+    deleteTaskModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        var taskId = button.getAttribute('data-task-id')
+        var form = document.getElementById('deleteTaskForm')
+        form.action = "{% url 'tasks:task_delete' 0 %}".replace('0', taskId)
+    })
+</script>
+{% endblock %} 

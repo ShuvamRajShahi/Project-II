@@ -1,0 +1,41 @@
+<div class="modal fade" id="removeTeamMemberModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Remove Team Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove <strong class="member-name"></strong> from the team?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This will:
+                    <ul class="mb-0">
+                        <li>Remove them from all assigned projects</li>
+                        <li>Unassign all their tasks</li>
+                        <li>Revoke their access to team resources</li>
+                    </ul>
+                </div>
+            </div>
+            <form method="post" action="{% url 'team:team_remove_member' %}">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" id="removeMemberUserId">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Remove Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('removeTeamMemberModal').addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const userId = button.getAttribute('data-user-id');
+        const userName = button.getAttribute('data-user-name');
+        
+        this.querySelector('.member-name').textContent = userName;
+        this.querySelector('#removeMemberUserId').value = userId;
+    });
+</script> 

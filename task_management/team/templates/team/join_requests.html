@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Team Join Requests - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Team Join Requests</h2>
+    </div>
+
+    {% comment %} {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %} {% endcomment %}
+
+    {% if pending_requests %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Team</th>
+                            <th>Requested</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in pending_requests %}
+                        <tr>
+                            <td class="align-middle">
+                                <div class="d-flex align-items-center">
+                                    {% if request.user.profile_picture %}
+                                        <img src="{{ request.user.get_profile_picture_url }}" alt="{{ request.user.get_full_name }}" 
+                                             class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                    {% else %}
+                                        <i class="fas fa-user-circle me-2" style="font-size: 32px;"></i>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-medium">{{ request.user.get_full_name }}</div>
+                                        <div class="small text-muted">{{ request.user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="align-middle">{{ request.team.name }}</td>
+                            <td class="align-middle">
+                                <div class="text-muted" title="{{ request.requested_at|date:'Y-m-d H:i' }}">
+                                    {{ request.requested_at|timesince }} ago
+                                </div>
+                            </td>
+                            <td class="align-middle text-end">
+                                <form method="post" action="{% url 'team:process_join_request' request.id %}" class="d-inline-block">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-sm btn-success me-2">
+                                        <i class="fas fa-check me-1"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'team:process_join_request' request.id %}" class="d-inline-block">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times me-1"></i> Reject
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h3 class="h4 mb-2">No Pending Requests</h3>
+            <p class="text-muted mb-0">There are no pending team join requests at this time.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

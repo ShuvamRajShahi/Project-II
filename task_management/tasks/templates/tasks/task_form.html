@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">{% if form.instance.pk %}Edit Task{% else %}Create New Task{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="taskForm">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.project|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                {{ form.title|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.due_date|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ form.description|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.assigned_to|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.status|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.priority|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.estimated_hours|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <a href="{% url 'tasks:task_list' %}" class="btn btn-secondary">Cancel</a>
+                            <div>
+                                <button type="submit" name="save_and_continue" class="btn btn-info me-2">Save and Continue</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const projectSelect = document.getElementById('id_project');
+    const assignedToSelect = document.getElementById('id_assigned_to');
+    const dueDateInput = document.getElementById('id_due_date');
+
+    // Function to update team members dropdown
+    function updateTeamMembers(projectId) {
+        if (!projectId) {
+            assignedToSelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        fetch(`/tasks/get-project-members/${projectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                assignedToSelect.innerHTML = '<option value="">---------</option>';
+                data.forEach(member => {
+                    const option = new Option(member.name, member.id);
+                    assignedToSelect.add(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Function to update due date constraints
+    function updateDueDateConstraints(projectId) {
+        if (!projectId) {
+            dueDateInput.removeAttribute('min');
+            dueDateInput.removeAttribute('max');
+            return;
+        }
+
+        fetch(`/tasks/get-project-dates/${projectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.start_date) {
+                    dueDateInput.setAttribute('min', data.start_date);
+                }
+                if (data.due_date) {
+                    dueDateInput.setAttribute('max', data.due_date);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Update dropdowns and constraints when project changes
+    projectSelect.addEventListener('change', function() {
+        const projectId = this.value;
+        updateTeamMembers(projectId);
+        updateDueDateConstraints(projectId);
+    });
+
+    // Initial update if project is already selected
+    if (projectSelect.value) {
+        updateTeamMembers(projectSelect.value);
+        updateDueDateConstraints(projectSelect.value);
+    }
+});
+</script>
+{% endblock %} 

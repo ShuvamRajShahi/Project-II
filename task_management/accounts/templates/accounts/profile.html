@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ user_profile.get_full_name|default:user_profile.username }}'s Profile - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if user_profile.profile_picture %}
+                        <img src="{{ user_profile.get_profile_picture_url }}" alt="Profile Picture" 
+                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <i class="fas fa-user-circle fa-6x mb-3 text-muted"></i>
+                    {% endif %}
+                    <h3 class="card-title mb-0">{{ user_profile.get_full_name|default:user_profile.username }}</h3>
+                    <p class="text-muted">{{ user_profile.get_user_type_display }}</p>
+                    
+                    <div class="text-start mt-4">
+                        <p><i class="fas fa-envelope me-2"></i> {{ user_profile.email|default:"No email provided" }}</p>
+                        <p><i class="fas fa-phone me-2"></i> {{ user_profile.phone|default:"No phone provided" }}</p>
+                        {% if user_profile.bio %}
+                            <p><i class="fas fa-info-circle me-2"></i> {{ user_profile.bio }}</p>
+                        {% endif %}
+                    </div>
+
+                    {% if user == user_profile %}
+                        <div class="mt-3">
+                            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                            <a href="{% url 'accounts:settings' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks and Projects -->
+        <div class="col-md-8">
+            <!-- Tasks Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Assigned Tasks</h5>
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if assigned_tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in assigned_tasks|slice:":5" %}
+                                <a href="{% url 'tasks:task_detail' task.id %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ task.title }}</h6>
+                                        <small class="text-muted">Due: {{ task.due_date|date }}</small>
+                                    </div>
+                                    <p class="mb-1 text-muted">{{ task.project.name }}</p>
+                                    <small class="text-{{ task.get_status_color }}">{{ task.get_status_display }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-3">No tasks assigned</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if user_profile.is_manager %}
+                <!-- Managed Projects Section -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Managed Projects</h5>
+                        <a href="{% url 'projects:project_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if managed_projects %}
+                            <div class="list-group list-group-flush">
+                                {% for project in managed_projects|slice:":5" %}
+                                    <a href="{% url 'projects:project_detail' project.id %}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ project.name }}</h6>
+                                            <small class="text-muted">{{ project.team_members.count }} members</small>
+                                        </div>
+                                        <p class="mb-1">{{ project.description|truncatechars:100 }}</p>
+                                        <small class="text-{{ project.get_status_color }}">{{ project.get_status_display }}</small>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted my-3">No projects managed</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

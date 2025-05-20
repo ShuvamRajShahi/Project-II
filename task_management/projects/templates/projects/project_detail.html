@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }} - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Project Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'projects:project_list' %}">Projects</a></li>
+                    <li class="breadcrumb-item active">{{ project.name }}</li>
+                </ol>
+            </nav>
+            <h1 class="mb-2">{{ project.name }}</h1>
+            <p class="text-muted mb-0">Manager: {{ project.manager.get_full_name|default:project.manager.username }}</p>
+            <p class="text-muted">Created: {{ project.created_at|date:"M d, Y" }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if user.is_manager and user == project.manager %}
+            <div class="btn-group">
+                <a href="{% url 'projects:project_edit' project.pk %}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit Project
+                </a>
+                <a href="{% url 'projects:project_export' project.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-download me-2"></i>Export
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Project Details -->
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-8">
+            <!-- Project Info Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Project Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Status:</strong>
+                            <span class="badge bg-{{ project.status|yesno:'success,secondary' }} ms-2">{{ project.get_status_display }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Start Date:</strong>
+                            <span class="ms-2">{{ project.start_date|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>End Date:</strong>
+                            <span class="ms-2">{{ project.end_date|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p class="mt-2">{{ project.description|linebreaks }}</p>
+                    </div>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ project.progress_percentage }}%">
+                            {{ project.progress_percentage }}% Complete
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Card -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Tasks</h2>
+                    {% if user.is_manager and user == project.manager %}
+                    <a href="{% url 'tasks:task_create' %}?project={{ project.pk }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Task
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if project.tasks.exists %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Assigned To</th>
+                                    <th>Status</th>
+                                    <th>Due Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in project.tasks.all %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'tasks:task_detail' task.pk %}" class="text-decoration-none">
+                                            {{ task.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ task.assigned_to.get_full_name|default:"Unassigned" }}</td>
+                                    <td><span class="badge bg-{{ task.status|yesno:'success,secondary' }}">{{ task.get_status_display }}</span></td>
+                                    <td>{{ task.due_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if user.is_manager and user == project.manager %}
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'tasks:task_edit' task.pk %}" class="btn btn-outline-primary">Edit</a>
+                                            <a href="{% url 'tasks:task_delete' task.pk %}" class="btn btn-outline-danger">Delete</a>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted my-4">No tasks have been created for this project yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <!-- Team Members Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Team Members</h2>
+                </div>
+                <div class="card-body">
+                    {% if project.team_members.exists %}
+                    <ul class="list-unstyled mb-0">
+                        {% for member in project.team_members.all %}
+                        <li class="d-flex align-items-center mb-2">
+                            {% if member.profile_picture %}
+                                <img src="{{ member.profile_picture_url }}" alt="{{ member.get_full_name }}" class="rounded-circle me-2" style="width: 24px; height: 24px; object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-user-circle me-2"></i>
+                            {% endif %}
+                            {{ member.get_full_name|default:member.username }}
+                            {% if member == project.manager %}
+                            <span class="badge bg-primary ms-2">Manager</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-center text-muted my-3">No team members assigned yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Project Stats Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Project Statistics</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <h3 class="h2">{{ project.tasks.count }}</h3>
+                            <p class="text-muted mb-0">Total Tasks</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h3 class="h2">{{ project.team_members.count }}</h3>
+                            <p class="text-muted mb-0">Team Members</p>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="h2 text-success">{{ project.tasks.completed.count }}</h3>
+                            <p class="text-muted mb-0">Completed</p>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="h2 text-warning">{{ project.tasks.pending.count }}</h3>
+                            <p class="text-muted mb-0">Pending</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

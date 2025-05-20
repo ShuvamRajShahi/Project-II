@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}How It Works - TaskForce{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-primary text-white py-4">
+    <div class="container">
+        <h1 class="display-5 fw-bold">How It Works</h1>
+        <p class="lead">Get started with TaskForce in just a few simple steps.</p>
+    </div>
+</section>
+
+<!-- Steps Section -->
+<section class="py-5">
+    <div class="container">
+        <!-- Step 1: Sign Up -->
+        <div class="row align-items-center mb-5">
+            <div class="col-md-6 order-md-2">
+                <img src="{% static 'images/signup.png' %}" alt="Sign Up" class="img-fluid rounded shadow-sm">
+            </div>
+            <div class="col-md-6 order-md-1">
+                <div class="step-number mb-3">1</div>
+                <h2>Create Your Account</h2>
+                <p class="lead text-muted">Sign up for free in less than a minute.</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>No credit card required</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Simple registration process</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Instant access to features</li>
+                </ul>
+                <a href="{% url 'accounts:signup' %}" class="btn btn-primary mt-3">Sign Up Now</a>
+            </div>
+        </div>
+
+        <!-- Step 2: Create Project -->
+        <div class="row align-items-center mb-5">
+            <div class="col-md-6">
+                <img src="{% static 'images/create-project.png' %}" alt="Create Project" class="img-fluid rounded shadow-sm">
+            </div>
+            <div class="col-md-6">
+                <div class="step-number mb-3">2</div>
+                <h2>Create Your First Project</h2>
+                <p class="lead text-muted">Set up your project with just a few clicks.</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Choose from project templates</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Define project goals</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Set project timeline</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 3: Add Team -->
+        <div class="row align-items-center mb-5">
+            <div class="col-md-6 order-md-2">
+                <img src="{% static 'images/add-team.png' %}" alt="Add Team" class="img-fluid rounded shadow-sm">
+            </div>
+            <div class="col-md-6 order-md-1">
+                <div class="step-number mb-3">3</div>
+                <h2>Invite Your Team</h2>
+                <p class="lead text-muted">Collaborate with your team members seamlessly.</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Easy team member invitation</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Assign roles and permissions</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Real-time collaboration</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 4: Track Progress -->
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <img src="{% static 'images/track-progress.png' %}" alt="Track Progress" class="img-fluid rounded shadow-sm">
+            </div>
+            <div class="col-md-6">
+                <div class="step-number mb-3">4</div>
+                <h2>Track Progress</h2>
+                <p class="lead text-muted">Monitor your project's progress in real-time.</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>View task status</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Track milestones</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Generate reports</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Frequently Asked Questions</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">How much does it cost?</h5>
+                        <p class="card-text">TaskForce offers a free plan for small teams. Premium features are available with our paid plans starting at $10/month.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Can I import existing projects?</h5>
+                        <p class="card-text">Yes, TaskForce supports importing projects from various formats including CSV, Excel, and other project management tools.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Is my data secure?</h5>
+                        <p class="card-text">We use industry-standard encryption and security measures to protect your data. Your information is safe with us.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Do you offer customer support?</h5>
+                        <p class="card-text">Yes, we provide 24/7 customer support through email and live chat for all our users.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to Get Started?</h2>
+        <p class="lead mb-4">Join thousands of teams already using TaskForce to manage their projects effectively.</p>
+        <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">Start Your Free Trial</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.step-number {
+    width: 40px;
+    height: 40px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %} 

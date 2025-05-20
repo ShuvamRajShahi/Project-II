@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Teams - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Teams</h2>
+        {% if user.is_manager %}
+        <a href="{% url 'team:team_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create New Team
+        </a>
+        {% endif %}
+    </div>
+
+    {% if managed_teams %}
+    <div class="mb-5">
+        <h3 class="h4 mb-3">Teams You Manage</h3>
+        <div class="row g-4">
+            {% for team in managed_teams %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title h5 mb-3">{{ team.name }}</h4>
+                        <p class="card-text text-muted mb-3">{{ team.description|truncatewords:30 }}</p>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-users me-2 text-primary"></i>
+                            <span>{{ team.team_members.count }} members</span>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'team:team_detail' team.pk %}" class="btn btn-outline-primary btn-sm me-2">
+                                <i class="fas fa-cog me-1"></i>Manage
+                            </a>
+                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteTeamModal{{ team.pk }}">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Team Modal -->
+            <div class="modal fade" id="deleteTeamModal{{ team.pk }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Delete Team</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Warning:</strong> This action cannot be undone.
+                            </div>
+                            <p>Are you sure you want to delete the team "{{ team.name }}"? This will:</p>
+                            <ul class="text-muted">
+                                <li>Remove all team members</li>
+                                <li>Delete all team data</li>
+                                <li>Cancel all pending join requests</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form method="post" action="{% url 'team:delete_team' team.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash me-1"></i>Delete Team
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if member_teams %}
+    <div class="mb-5">
+        <h3 class="h4 mb-3">Teams You're In</h3>
+        <div class="row g-4">
+            {% for team in member_teams %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title h5 mb-3">{{ team.name }}</h4>
+                        <p class="card-text text-muted mb-3">{{ team.description|truncatewords:30 }}</p>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-user-tie me-2 text-primary"></i>
+                            <span>Manager: {{ team.manager.get_full_name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'team:team_detail' team.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-info-circle me-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not managed_teams and not member_teams %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h3 class="h4 mb-2">No Teams Found</h3>
+            {% if user.is_manager %}
+                <p class="text-muted mb-4">Start by creating your first team!</p>
+                <a href="{% url 'team:team_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create New Team
+                </a>
+            {% else %}
+                <p class="text-muted mb-0">You are not a member of any teams yet.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to handle message dismissal
+    function dismissMessages() {
+        const messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            const alerts = messagesContainer.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                // Use Bootstrap's Alert to handle dismissal
+                const bsAlert = new bootstrap.Alert(alert);
+                setTimeout(() => {
+                    bsAlert.close();
+                }, 5000);
+            });
+            
+            // Remove the container after all alerts are dismissed
+            setTimeout(() => {
+                if (messagesContainer.parentNode) {
+                    messagesContainer.parentNode.removeChild(messagesContainer);
+                }
+            }, 5500);
+        }
+    }
+
+    // Call the function when the page loads
+    dismissMessages();
+
+    // Clear messages from session storage to prevent duplicates
+    if (window.sessionStorage) {
+        sessionStorage.removeItem('django_messages');
+    }
+});
+</script>
+{% endblock %} 

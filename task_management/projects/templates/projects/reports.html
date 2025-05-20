@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Project Reports - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Project Reports</h1>
+
+    <!-- Project Statistics -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Project Statistics</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2">{{ project_stats.total }}</h3>
+                        <p class="text-muted">Total Projects</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2 text-primary">{{ project_stats.active }}</h3>
+                        <p class="text-muted">Active Projects</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2 text-success">{{ project_stats.completed }}</h3>
+                        <p class="text-muted">Completed Projects</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2 text-warning">{{ project_stats.on_hold }}</h3>
+                        <p class="text-muted">On Hold Projects</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Statistics -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Task Statistics</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2">{{ task_stats.total }}</h3>
+                        <p class="text-muted">Total Tasks</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2 text-primary">{{ task_stats.in_progress }}</h3>
+                        <p class="text-muted">In Progress</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2 text-success">{{ task_stats.completed }}</h3>
+                        <p class="text-muted">Completed</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h3 class="h2 text-warning">{{ task_stats.pending }}</h3>
+                        <p class="text-muted">Pending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Statistics -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Team Statistics</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <h3 class="h2">{{ team_stats.total_members }}</h3>
+                        <p class="text-muted">Total Team Members</p>
+                    </div>
+                </div>
+            </div>
+            
+            {% if team_stats.projects_by_member %}
+            <h3 class="h6 mb-3">Projects per Team Member</h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Team Member</th>
+                            <th>Number of Projects</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in team_stats.projects_by_member %}
+                        <tr>
+                            <td>{{ member.team_members__username }}</td>
+                            <td>{{ member.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center">No team members assigned to projects yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

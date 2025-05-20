@@ -1,0 +1,27 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Join TaskForce - Team Invitation{% endblock %}
+
+{% block content %}
+<h2>You're Invited to Join TaskForce!</h2>
+
+<p>Hello,</p>
+
+<p>You've been invited to join TaskForce as a {{ invitation.role|lower }}. Join our team and start collaborating on exciting projects!</p>
+
+{% if invitation.message %}
+<p><strong>Message from {{ invitation.invited_by.get_full_name }}:</strong><br>
+{{ invitation.message }}</p>
+{% endif %}
+
+<p>To accept this invitation and create your account, click the button below:</p>
+
+<p style="text-align: center;">
+    <a href="{{ signup_url }}" class="button" style="color: white;">Accept Invitation</a>
+</p>
+
+<p><small>This invitation will expire in 7 days. If you believe this was sent in error, please ignore this email.</small></p>
+
+<p>Best regards,<br>
+The TaskForce Team</p>
+{% endblock %} 

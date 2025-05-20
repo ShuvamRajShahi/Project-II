@@ -1,0 +1,63 @@
+<div class="modal fade" id="assignProjectsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Projects to <span class="member-name"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'team:team_assign_projects' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" id="assignProjectUserId">
+                    <div class="mb-3">
+                        <label class="form-label">Select Projects</label>
+                        <div class="project-list">
+                            {% for project in projects %}
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       name="projects" 
+                                       value="{{ project.id }}" 
+                                       class="form-check-input project-checkbox" 
+                                       id="project{{ project.id }}">
+                                <label class="form-check-label" for="project{{ project.id }}">
+                                    {{ project.name }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('assignProjectsModal').addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const userId = button.getAttribute('data-user-id');
+        const userName = button.getAttribute('data-user-name');
+        
+        this.querySelector('.member-name').textContent = userName;
+        this.querySelector('#assignProjectUserId').value = userId;
+        
+        // Reset checkboxes
+        this.querySelectorAll('.project-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Load user's current projects
+        fetch(`/api/team/user-projects/${userId}/`)
+            .then(response => response.json())
+            .then(data => {
+                data.projects.forEach(projectId => {
+                    const checkbox = document.getElementById(`project${projectId}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            });
+    });
+</script> 

@@ -1,0 +1,56 @@
+<!-- Share Project Modal -->
+<div class="modal fade" id="shareProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Share Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Project Link</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ request.build_absolute_uri }}" id="projectLink" readonly>
+                        <button class="btn btn-outline-primary" type="button" onclick="copyProjectLink()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                {% if user.is_manager %}
+                <hr>
+                <form method="post" action="{% url 'team:team_invite' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Invite Team Member</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message (Optional)</label>
+                        <textarea class="form-control" id="message" name="message" rows="3" placeholder="Add a personal message to your invitation"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Invitation</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Copy Link Script -->
+<script>
+function copyProjectLink() {
+    var copyText = document.getElementById("projectLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); /* For mobile devices */
+    document.execCommand("copy");
+    
+    // Show feedback
+    var button = event.currentTarget;
+    var originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    setTimeout(function() {
+        button.innerHTML = originalHtml;
+    }, 2000);
+}
+</script> 

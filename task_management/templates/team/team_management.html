@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Team Management - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Team Management</h1>
+            <p class="text-muted">Manage your team members and their roles</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inviteTeamMemberModal">
+                <i class="fas fa-user-plus"></i> Invite Member
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Team Members List -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#active-members" data-bs-toggle="tab">Active Members</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#pending-invites" data-bs-toggle="tab">Pending Invites</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Active Members Tab -->
+                        <div class="tab-pane fade show active" id="active-members">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Member</th>
+                                            <th>Role</th>
+                                            <th>Projects</th>
+                                            <th>Tasks</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for member in team_members %}
+                                        <tr>
+                                            <td class="align-middle">
+                                                {% if member.profile_picture %}
+                                                    <img src="{{ member.profile_picture_url }}" alt="{{ member.get_full_name }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                                {% else %}
+                                                    <i class="fas fa-user-circle me-2"></i>
+                                                {% endif %}
+                                                {{ member.get_full_name|default:member.username }}
+                                            </td>
+                                            <td>
+                                                <select class="form-select form-select-sm role-select" 
+                                                        data-user-id="{{ member.id }}"
+                                                        {% if member == request.user %}disabled{% endif %}>
+                                                    {% for role in roles %}
+                                                    <option value="{{ role.0 }}" {% if member.user_type == role.0 %}selected{% endif %}>
+                                                        {{ role.1 }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td>{{ member.assigned_projects.count }}</td>
+                                            <td>{{ member.assigned_tasks.count }}</td>
+                                            <td>
+                                                {% if member.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#assignProjectsModal"
+                                                            data-user-id="{{ member.id }}"
+                                                            data-user-name="{{ member.get_full_name }}">
+                                                        <i class="fas fa-project-diagram"></i>
+                                                    </button>
+                                                    {% if member != request.user %}
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#removeTeamMemberModal"
+                                                            data-user-id="{{ member.id }}"
+                                                            data-user-name="{{ member.get_full_name }}">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4">
+                                                <p class="text-muted mb-0">No team members found.</p>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Pending Invites Tab -->
+                        <div class="tab-pane fade" id="pending-invites">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Invited By</th>
+                                            <th>Invited On</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for invite in pending_invites %}
+                                        <tr>
+                                            <td>{{ invite.email }}</td>
+                                            <td>{{ invite.get_role_display }}</td>
+                                            <td>{{ invite.invited_by.get_full_name }}</td>
+                                            <td>{{ invite.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#cancelInviteModal"
+                                                        data-invite-id="{{ invite.id }}">
+                                                    Cancel
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4">
+                                                <p class="text-muted mb-0">No pending invites.</p>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Statistics -->
+        <div class="col-lg-4">
+            <!-- Team Overview Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Team Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h3 class="mb-1">{{ total_members }}</h3>
+                                <small class="text-muted">Total Members</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h3 class="mb-1">{{ active_projects }}</h3>
+                                <small class="text-muted">Active Projects</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h3 class="mb-1">{{ pending_tasks }}</h3>
+                                <small class="text-muted">Pending Tasks</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h3 class="mb-1">{{ completion_rate }}%</h3>
+                                <small class="text-muted">Completion Rate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Team Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for activity in recent_activities %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <p class="mb-0">{{ activity.description }}</p>
+                                <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted text-center">No recent activity.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include 'team/includes/invite_member_modal.html' %}
+{% include 'team/includes/assign_projects_modal.html' %}
+{% include 'team/includes/remove_member_modal.html' %}
+{% include 'team/includes/cancel_invite_modal.html' %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -1.5rem;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: var(--bs-primary);
+        border: 2px solid #fff;
+    }
+    .timeline-content {
+        padding-left: 1rem;
+        border-left: 2px solid #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'js/team-management.js' %}"></script>
+{% endblock %} 

@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if task %}Edit Task{% else %}Create New Task{% endif %} - TaskForce
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% if task %}
+                        <li class="breadcrumb-item"><a href="{% url 'projects:project_detail' task.project.id %}">{{ task.project.name }}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'tasks:task_detail' task.id %}">{{ task.title }}</a></li>
+                        <li class="breadcrumb-item active">Edit</li>
+                    {% else %}
+                        {% if project %}
+                            <li class="breadcrumb-item"><a href="{% url 'projects:project_detail' project.id %}">{{ project.name }}</a></li>
+                        {% endif %}
+                        <li class="breadcrumb-item active">New Task</li>
+                    {% endif %}
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">{% if task %}Edit Task{% else %}Create New Task{% endif %}</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="taskForm">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <!-- Title -->
+                            <div class="col-12">
+                                {{ form.title|as_crispy_field }}
+                            </div>
+
+                            <!-- Project Selection -->
+                            <div class="col-md-6">
+                                {{ form.project|as_crispy_field }}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                {{ form.description|as_crispy_field }}
+                            </div>
+
+                            <!-- Assigned To -->
+                            <div class="col-md-6">
+                                {{ form.assigned_to|as_crispy_field }}
+                            </div>
+
+                            <!-- Due Date -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.due_date|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-4">
+                                {{ form.status|as_crispy_field }}
+                            </div>
+
+                            <!-- Priority -->
+                            <div class="col-md-4">
+                                {{ form.priority|as_crispy_field }}
+                            </div>
+
+                            <!-- Estimated Hours -->
+                            <div class="col-md-4">
+                                {{ form.estimated_hours|as_crispy_field }}
+                            </div>
+
+                            <!-- Attachments -->
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Attachments</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="attachment-container">
+                                            <div class="mb-3">
+                                                <input type="file" name="attachments" class="form-control" multiple>
+                                            </div>
+                                            {% if task and task.attachments.exists %}
+                                            <div class="list-group">
+                                                {% for attachment in task.attachments.all %}
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+                                                        <br>
+                                                        <small class="text-muted">Uploaded by {{ attachment.user.get_full_name }}</small>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input type="checkbox" name="delete_attachments" value="{{ attachment.id }}" class="form-check-input">
+                                                        <label class="form-check-label">Delete</label>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% if task %}{% url 'tasks:task_detail' task.id %}{% else %}{% url 'tasks:task_list' %}{% endif %}" 
+                                       class="btn btn-outline-secondary">
+                                        Cancel
+                                    </a>
+                                    <div>
+                                        {% if task %}
+                                        <button type="submit" name="save_and_continue" class="btn btn-outline-primary me-2">
+                                            Save and Continue Editing
+                                        </button>
+                                        {% endif %}
+                                        <button type="submit" class="btn btn-primary">
+                                            {% if task %}Save Changes{% else %}Create Task{% endif %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Help and Tips -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Tips for Task Creation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>Writing Good Task Descriptions</h6>
+                        <ul class="text-muted small">
+                            <li>Be clear and specific about what needs to be done</li>
+                            <li>Include any relevant context or background information</li>
+                            <li>List any dependencies or prerequisites</li>
+                            <li>Specify the expected outcome or deliverables</li>
+                        </ul>
+                    </div>
+                    <div class="mb-4">
+                        <h6>Setting Priority Levels</h6>
+                        <ul class="text-muted small">
+                            <li><strong>Urgent:</strong> Needs immediate attention</li>
+                            <li><strong>High:</strong> Important but not urgent</li>
+                            <li><strong>Medium:</strong> Normal priority</li>
+                            <li><strong>Low:</strong> Can be done when time permits</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h6>Estimating Time</h6>
+                        <p class="text-muted small">Consider breaking down the task into smaller parts and estimate each part separately for more accurate time estimation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize datepicker for due date
+    $(function() {
+        $("#id_due_date").flatpickr({
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            minDate: "today"
+        });
+    });
+
+    // Dynamic project member loading for assigned_to field
+    document.getElementById('id_project').addEventListener('change', function() {
+        const projectId = this.value;
+        const assignedToSelect = document.getElementById('id_assigned_to');
+        
+        if (projectId) {
+            fetch(`/api/projects/${projectId}/members/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Clear current options
+                    assignedToSelect.innerHTML = '<option value="">---------</option>';
+                    
+                    // Add new options
+                    data.forEach(member => {
+                        const option = new Option(member.name, member.id);
+                        assignedToSelect.add(option);
+                    });
+                });
+        }
+    });
+
+    // Dynamic parent task loading based on project
+    document.getElementById('id_project').addEventListener('change', function() {
+        const projectId = this.value;
+        const parentTaskSelect = document.getElementById('id_parent_task');
+        
+        if (projectId) {
+            fetch(`/api/projects/${projectId}/tasks/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Clear current options
+                    parentTaskSelect.innerHTML = '<option value="">---------</option>';
+                    
+                    // Add new options
+                    data.forEach(task => {
+                        const option = new Option(task.title, task.id);
+                        parentTaskSelect.add(option);
+                    });
+                });
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const projectSelect = document.getElementById('id_project');
+        const assignedToSelect = document.getElementById('id_assigned_to');
+        const dueDateInput = document.getElementById('id_due_date');
+
+        // Function to update team members dropdown
+        function updateTeamMembers(projectId) {
+            if (!projectId) {
+                assignedToSelect.innerHTML = '<option value="">---------</option>';
+                return;
+            }
+
+            fetch(`/tasks/get-project-members/${projectId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    assignedToSelect.innerHTML = '<option value="">---------</option>';
+                    data.forEach(member => {
+                        const option = document.createElement('option');
+                        option.value = member.id;
+                        option.textContent = member.name;
+                        assignedToSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Function to update project dates
+        function updateProjectDates(projectId) {
+            if (!projectId) {
+                dueDateInput.min = '';
+                dueDateInput.max = '';
+                return;
+            }
+
+            fetch(`/tasks/get-project-dates/${projectId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.start_date) {
+                        dueDateInput.min = data.start_date;
+                    }
+                    if (data.due_date) {
+                        dueDateInput.max = data.due_date;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Update team members and dates when project changes
+        projectSelect.addEventListener('change', function() {
+            const projectId = this.value;
+            updateTeamMembers(projectId);
+            updateProjectDates(projectId);
+        });
+
+        // Initial update if project is pre-selected
+        if (projectSelect.value) {
+            updateTeamMembers(projectSelect.value);
+            updateProjectDates(projectSelect.value);
+        }
+    });
+</script>
+{% endblock %} 

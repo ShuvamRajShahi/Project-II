@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ project.name }} - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Delete Project</h2>
+                </div>
+                <div class="card-body">
+                    <p class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Are you sure you want to delete the project "{{ project.name }}"?
+                    </p>
+                    <p class="text-muted">This action cannot be undone. All tasks, comments, and time entries associated with this project will be permanently deleted.</p>
+                    
+                    <!-- Project Summary -->
+                    <div class="mb-4">
+                        <h3 class="h5">Project Summary:</h3>
+                        <ul class="list-unstyled">
+                            <li><strong>Tasks:</strong> {{ project.tasks.count }}</li>
+                            <li><strong>Team Members:</strong> {{ project.team_members.count }}</li>
+                            <li><strong>Created:</strong> {{ project.created_at|date:"M d, Y" }}</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Delete Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

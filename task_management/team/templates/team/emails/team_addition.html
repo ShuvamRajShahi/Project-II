@@ -1,0 +1,25 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Added to {{ team.name }} - TaskForce{% endblock %}
+
+{% block content %}
+<h2>Welcome to {{ team.name }}!</h2>
+
+<p>Hello,</p>
+
+<p>You have been added to the team "{{ team.name }}" by {{ added_by.get_full_name }}.</p>
+
+{% if message %}
+<p><strong>Message from {{ added_by.get_full_name }}:</strong><br>
+{{ message }}</p>
+{% endif %}
+
+<p>You can now access team projects and collaborate with other team members. Log in to your account to get started.</p>
+
+<p style="text-align: center;">
+    <a href="{{ login_url }}" class="button" style="color: white;">Go to TaskForce</a>
+</p>
+
+<p>Best regards,<br>
+The TaskForce Team</p>
+{% endblock %} 

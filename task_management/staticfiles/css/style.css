@@ -1,0 +1,372 @@
+/* Modern Theme Colors */
+:root {
+    --primary-color: #6c5ce7;
+    --secondary-color: #8c7ae6;
+    --accent-color: #a29bfe;
+    --success-color: #00b894;
+    --warning-color: #fdcb6e;
+    --danger-color: #d63031;
+    --light-color: #f5f6fa;
+    --dark-color: #4834d4;
+    --text-color: #2d3436;
+    --text-muted: #636e72;
+    --border-color: #dfe6e9;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--text-color);
+    background-color: #f8f9fa;
+}
+
+/* Navbar Styling */
+.navbar {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+/* Card Styling */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+}
+
+/* Button Styling */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-color);
+    border-color: var(--dark-color);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* Form Controls */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Table Styling */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: var(--light-color);
+    border-bottom: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1rem;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* Badge Styling */
+.badge {
+    padding: 0.5em 1em;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+/* Alert Styling */
+.alert {
+    border: none;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+}
+
+/* Progress Bar */
+.progress {
+    background-color: var(--light-color);
+    border-radius: 0.25rem;
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+}
+
+/* Custom Status Colors */
+.status-todo { background-color: var(--light-color); }
+.status-in-progress { background-color: var(--warning-color); }
+.status-completed { background-color: var(--success-color); }
+.status-review { background-color: var(--accent-color); }
+
+/* Priority Colors */
+.priority-low { color: var(--text-muted); }
+.priority-medium { color: var(--warning-color); }
+.priority-high { color: var(--danger-color); }
+.priority-urgent { 
+    color: white;
+    background-color: var(--danger-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Footer Styling */
+.footer {
+    background-color: var(--light-color);
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+/* Utility Classes */
+.shadow-sm {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.shadow {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+    .display-4 { font-size: 2.5rem; }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Custom styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Card styles */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+/* List group */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 1rem;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Status colors */
+.text-pending {
+    color: var(--warning-color);
+}
+
+.text-completed {
+    color: var(--success-color);
+}
+
+.text-in-progress {
+    color: var(--accent-color);
+}
+
+.text-blocked {
+    color: var(--danger-color);
+}
+
+.bg-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-color);
+    border-color: var(--dark-color);
+}
+
+.feature-icon i {
+    color: var(--primary-color) !important;
+}
+
+.step-number {
+    background-color: var(--primary-color) !important;
+}
+
+/* Override Bootstrap's default blue */
+.btn-primary, 
+.btn-primary:active,
+.btn-primary:focus {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Override any remaining blue colors */
+.text-primary, 
+.link-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+/* Override Bootstrap's focus states */
+.form-control:focus,
+.btn:focus,
+.btn-check:focus + .btn-primary {
+    box-shadow: 0 0 0 0.25rem rgba(108, 92, 231, 0.25) !important;
+}
+
+/* View All button and similar buttons */
+.btn-info,
+.btn-info:active,
+.btn-info:focus {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+.btn-info:hover {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+}
+
+a:hover {
+    color: var(--dark-color);
+}
+
+/* Active states */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    background-color: var(--primary-color) !important;
+}
+
+.dropdown-item.active, 
+.dropdown-item:active {
+    background-color: var(--primary-color) !important;
+} 

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Projects - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Projects</h1>
+            <p class="text-muted">Manage and track all your projects</p>
+        </div>
+        {% if user.is_manager %}
+        <div>
+            <a href="{% url 'projects:project_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Project
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        {% for status in status_choices %}
+                        <option value="{{ status.0 }}" {% if status.0 == selected_status %}selected{% endif %}>
+                            {{ status.1 }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Sort By</label>
+                    <select name="sort" class="form-select">
+                        <option value="name">Name</option>
+                        <option value="start_date">Start Date</option>
+                        <option value="end_date">End Date</option>
+                        <option value="status">Status</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Projects List -->
+    <div class="row g-4">
+        {% for project in projects %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">
+                            <a href="{% url 'projects:project_detail' project.id %}" class="text-decoration-none">
+                                {{ project.name }}
+                            </a>
+                        </h5>
+                        <span class="badge bg-{{ project.get_status_color }}">{{ project.get_status_display }}</span>
+                    </div>
+                    <p class="card-text text-muted">{{ project.description|truncatewords:30 }}</p>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Progress</small>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ project.completion_percentage }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="team-members">
+                            {% for member in project.team_members.all|slice:":3" %}
+                                {% if member.profile_picture %}
+                                    <img src="{{ member.profile_picture_url }}" alt="{{ member.get_full_name }}" class="rounded-circle me-1" style="width: 24px; height: 24px; object-fit: cover;">
+                                {% else %}
+                                    <i class="fas fa-user-circle me-1"></i>
+                                {% endif %}
+                            {% endfor %}
+                            {% if project.team_members.count > 3 %}
+                                <span class="text-muted">+{{ project.team_members.count|add:"-3" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="project-dates">
+                            <small class="text-muted">
+                                {{ project.start_date|date:"M d" }} - {{ project.end_date|date:"M d, Y" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <img src="{% static 'images/no-projects.svg' %}" alt="No Projects" class="mb-3" style="max-width: 200px;">
+                <h4>No Projects Found</h4>
+                <p class="text-muted">There are no projects matching your criteria.</p>
+                {% if user.is_manager %}
+                <a href="{% url 'projects:project_create' %}" class="btn btn-primary">Create New Project</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %} 

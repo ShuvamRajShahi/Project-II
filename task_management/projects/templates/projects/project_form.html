@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit Project{% else %}Create New Project{% endif %} - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">{% if form.instance.pk %}Edit Project{% else %}Create New Project{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.description|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.start_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.end_date|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.team_members|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.status|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <a href="{% url 'projects:project_list' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Update{% else %}Create{% endif %} Project</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date inputs
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        input.valueAsDate = input.value ? new Date(input.value) : null;
+    });
+
+    // Add validation for end date being after start date
+    const startDateInput = document.getElementById('id_start_date');
+    const endDateInput = document.getElementById('id_end_date');
+
+    if (startDateInput && endDateInput) {
+        endDateInput.addEventListener('change', function() {
+            if (startDateInput.value && this.value && this.value < startDateInput.value) {
+                alert('End date must be after start date');
+                this.value = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

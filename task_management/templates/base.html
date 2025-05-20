@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskForce{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'projects:dashboard' %}{% else %}{% url 'landing' %}{% endif %}">TaskForce</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'projects:dashboard' %}" data-nav-item="dashboard">
+                                <i class="fas fa-home nav-icon me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        {% if user.is_manager %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'projects:project_list' %}" data-nav-item="projects">
+                                    <i class="fas fa-project-diagram nav-icon me-1"></i>Projects
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="teamsDropdown" role="button" data-bs-toggle="dropdown" data-nav-item="teams">
+                                <i class="fas fa-users nav-icon me-1"></i>Teams
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'team:team_list' %}">
+                                        <i class="fas fa-list nav-icon me-2"></i>View Teams
+                                    </a>
+                                </li>
+                                {% if user.is_manager %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'team:team_create' %}">
+                                        <i class="fas fa-plus nav-icon me-2"></i>Create Team
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'tasks:task_list' %}" data-nav-item="tasks">
+                                <i class="fas fa-tasks nav-icon me-1"></i>My Tasks
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                {% if user.profile_picture %}
+                                    <img src="{{ user.profile_picture_url }}" alt="Profile" class="rounded-circle me-1" style="width: 24px; height: 24px; object-fit: cover;">
+                                {% else %}
+                                    <i class="fas fa-user-circle me-1"></i>
+                                {% endif %}
+                                {{ user.get_full_name|default:user.username }}
+                                {% if user.is_manager %}
+                                    <span class="badge bg-light text-primary ms-1">Manager</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:settings' %}">Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:signup' %}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        <div id="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="py-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© {% now "Y" %} TaskForce. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <script>
+    // Handle messages dismissal
+    document.addEventListener('DOMContentLoaded', function() {
+        const messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            const alerts = messagesContainer.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(() => {
+                    alert.classList.remove('show');
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 150);
+                }, 5000);
+            });
+
+            // Remove container if empty
+            const observer = new MutationObserver(function(mutations) {
+                if (messagesContainer.children.length === 0) {
+                    messagesContainer.remove();
+                    observer.disconnect();
+                }
+            });
+
+            observer.observe(messagesContainer, { childList: true });
+        }
+    });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

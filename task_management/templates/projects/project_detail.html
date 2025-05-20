@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project.name }} - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Project Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">{{ project.name }}</h1>
+                    <p class="text-muted mb-0">Created by {{ project.manager.get_full_name }}</p>
+                </div>
+                <div class="btn-group">
+                    {% if user.is_manager %}
+                    <a href="{% url 'projects:project_edit' project.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit Project
+                    </a>
+                    {% endif %}
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareProjectModal">
+                            <i class="fas fa-share-alt"></i> Share
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'projects:project_export' project.id %}">
+                            <i class="fas fa-download"></i> Export
+                        </a></li>
+                        {% if user.is_manager %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteProjectModal">
+                            <i class="fas fa-trash"></i> Delete
+                        </a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Info -->
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Overview Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6>Status</h6>
+                            <span class="badge bg-{{ project.get_status_color }}">{{ project.get_status_display }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Progress</h6>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: {{ project.completion_percentage }}%">
+                                    {{ project.completion_percentage }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Start Date</h6>
+                            <p class="mb-0">{{ project.start_date|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>End Date</h6>
+                            <p class="mb-0">{{ project.end_date|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-12">
+                            <h6>Description</h6>
+                            <p class="mb-0">{{ project.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Card -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Tasks</h5>
+                    {% if user.is_manager and user == project.manager %}
+                    <a href="{% url 'tasks:task_create' %}?project={{ project.pk }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Task
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Assigned To</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in project.project_tasks.all %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'tasks:task_detail' task.id %}" class="text-decoration-none">
+                                            {{ task.title }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if task.assigned_to %}
+                                            {{ task.assigned_to.get_full_name }}
+                                        {% else %}
+                                            <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ task.due_date|date:"M d, Y" }}</td>
+                                    <td><span class="badge bg-{{ task.get_status_color }}">{{ task.get_status_display }}</span></td>
+                                    <td><span class="badge text-white bg-{{ task.get_priority_color }}">{{ task.get_priority_display }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <p class="text-muted mb-0">No tasks created yet.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Team Members Card -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Team Members</h5>
+                    {% if user.is_manager %}
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addTeamMemberModal">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for member in project.team_members.all %}
+                        <div class="list-group-item d-flex align-items-center">
+                            {% if member.profile_picture %}
+                                <img src="{{ member.get_profile_picture_url }}" alt="{{ member.get_full_name }}" class="rounded-circle me-3" width="40" style="height: 40px; object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-user-circle me-3" style="font-size: 40px;"></i>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ member.get_full_name }}</h6>
+                                <small class="text-muted">{{ member.get_user_type_display }}</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted text-center my-3">No team members added yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for activity in project.activities.all|slice:":10" %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">{{ activity.description }}</h6>
+                                <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted text-center my-3">No recent activity.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include 'projects/includes/delete_project_modal.html' %}
+{% include 'projects/includes/share_project_modal.html' %}
+{% include 'projects/includes/add_team_member_modal.html' %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -1.5rem;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: #primary;
+        border: 2px solid #fff;
+    }
+    .timeline-content {
+        padding-left: 1rem;
+        border-left: 2px solid #e9ecef;
+    }
+</style>
+{% endblock %} 

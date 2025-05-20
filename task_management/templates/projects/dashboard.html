@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">Welcome, {{ user.get_full_name|default:user.username }}!</h1>
+            <p class="text-muted">Here's an overview of your tasks and projects</p>
+        </div>
+        <div class="col-auto">
+            {% if user.is_manager %}
+            <a href="{% url 'projects:project_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Project
+            </a>
+            {% endif %}
+            <a href="{% url 'tasks:task_create' %}" class="btn btn-outline-primary">
+                <i class="fas fa-plus"></i> New Task
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Active Projects</h5>
+                    <h2 class="mb-0">{{ projects.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tasks Completed</h5>
+                    <h2 class="mb-0">{{ completed_tasks_count|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Tasks</h5>
+                    <h2 class="mb-0">{{ pending_tasks_count|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Hours Logged</h5>
+                    <h2 class="mb-0">{{ total_hours_logged|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Tasks -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Tasks</h5>
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_tasks %}
+                    <div class="list-group list-group-flush">
+                        {% for task in recent_tasks %}
+                        <a href="{% url 'tasks:task_detail' task.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ task.title }}</h6>
+                                <small class="text-muted">{{ task.due_date|date }}</small>
+                            </div>
+                            <p class="mb-1 text-muted">{{ task.project.name }}</p>
+                            <small class="text-{{ task.get_status_color }}">{{ task.get_status_display }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center my-3">No recent tasks</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Progress -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Project Progress</h5>
+                    <a href="{% url 'projects:project_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if projects %}
+                    <div class="list-group list-group-flush">
+                        {% for project in projects %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between mb-1">
+                                <h6 class="mb-0">{{ project.name }}</h6>
+                                <small class="text-muted">{{ project.completion_percentage|default:"0" }}%</small>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ project.completion_percentage|default:'0' }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center my-3">No active projects</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 

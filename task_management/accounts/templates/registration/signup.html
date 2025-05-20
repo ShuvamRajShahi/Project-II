@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Sign Up - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Sign Up</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Info Alert -->
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Want to be a Project Manager?</h5>
+                        <p class="mb-0">After signing up, contact the system administrator to request manager privileges. Manager accounts can create projects and manage team members.</p>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- User Type Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Select Your Role</label>
+                            <div class="row g-3">
+                                {% for radio in form.user_type %}
+                                <div class="col-md-6">
+                                    <div class="card role-card {% if radio.data.selected %}selected{% endif %}">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                {{ radio.tag }}
+                                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                                    {% if radio.choice_value == 'MANAGER' %}
+                                                        <i class="fas fa-user-tie fa-2x mb-2 text-primary"></i>
+                                                        <h5>Project Manager</h5>
+                                                        <p class="text-muted small mb-0">Create and manage projects, teams, and assign tasks.</p>
+                                                    {% else %}
+                                                        <i class="fas fa-user fa-2x mb-2 text-primary"></i>
+                                                        <h5>Team Member</h5>
+                                                        <p class="text-muted small mb-0">Join teams, work on tasks, and collaborate with others.</p>
+                                                    {% endif %}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.user_type.errors %}
+                            <div class="text-danger small mt-2">{{ form.user_type.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.last_name|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.username|as_crispy_field }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.email|as_crispy_field }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.password1|as_crispy_field }}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.password2|as_crispy_field }}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Sign Up</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    Already have an account? <a href="{% url 'login' %}">Log In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-check-label small {
+    margin-left: 1.5rem;
+}
+
+.role-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.role-card:hover {
+    border-color: var(--bs-primary);
+    transform: translateY(-2px);
+}
+
+.role-card .form-check {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+.role-card .form-check-input {
+    display: none;
+}
+
+.role-card .form-check-label {
+    cursor: pointer;
+    display: block;
+    width: 100%;
+}
+
+.role-card.selected {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.role-card i {
+    display: block;
+    margin: 0 auto 1rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleCards = document.querySelectorAll('.role-card');
+    roleCards.forEach(card => {
+        const radio = card.querySelector('input[type="radio"]');
+        
+        // Set initial selected state
+        if (radio.checked) {
+            card.classList.add('selected');
+        }
+
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            roleCards.forEach(c => c.classList.remove('selected'));
+            // Add selected class to clicked card
+            card.classList.add('selected');
+            // Check the radio button
+            radio.checked = true;
+        });
+    });
+});
+</script>
+{% endblock %} 

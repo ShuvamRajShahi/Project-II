@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects - TaskForce{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Projects</h1>
+        {% if user.is_manager %}
+        <a href="{% url 'projects:project_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create New Project
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        <option value="planning" {% if request.GET.status == 'planning' %}selected{% endif %}>Planning</option>
+                        <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="on_hold" {% if request.GET.status == 'on_hold' %}selected{% endif %}>On Hold</option>
+                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for project in projects %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">
+                            <a href="{% url 'projects:project_detail' project.pk %}" class="text-decoration-none">{{ project.name }}</a>
+                        </h5>
+                        <span class="badge bg-{{ project.status|yesno:'success,secondary' }}">{{ project.get_status_display }}</span>
+                    </div>
+                    <p class="card-text text-muted small mb-2">Manager: {{ project.manager.get_full_name|default:project.manager.username }}</p>
+                    <p class="card-text">{{ project.description|truncatewords:30 }}</p>
+                    <div class="progress mb-3" style="height: 5px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ project.progress_percentage }}%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ project.team_members.count }} team members</small>
+                        <small class="text-muted">Due: {{ project.end_date|date:"M d, Y" }}</small>
+                    </div>
+                </div>
+                {% if user.is_manager and user == project.manager %}
+                <div class="card-footer bg-transparent">
+                    <div class="btn-group w-100">
+                        <a href="{% url 'projects:project_edit' project.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                        <a href="{% url 'projects:project_delete' project.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                {% if user.is_manager %}
+                No projects found. Click the "Create New Project" button to get started!
+                {% else %}
+                You haven't been assigned to any projects yet.
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %} 
